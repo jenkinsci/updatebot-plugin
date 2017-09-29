@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jenkinsci.plugins.updatebot;
+package org.jenkinsci.plugins.updatebot.support;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 

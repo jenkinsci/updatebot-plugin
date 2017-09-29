@@ -31,3 +31,5 @@ target
 *.iml
 
 work
+
+.updatebot-repos
