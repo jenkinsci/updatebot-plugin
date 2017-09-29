@@ -104,7 +104,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
                 file = configFile.toString();
             }
         }
-        List<String> arguments = Arrays.asList("push", "--dir", file);
+        List<String> arguments = Arrays.asList( "--dir", file, "push");
         return runUpdateBotCLI(arguments);
     }
 
