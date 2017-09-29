@@ -25,3 +25,9 @@ target
 .project
 .settings
 .classpath
+
+# IDEA
+.idea
+*.iml
+
+work
