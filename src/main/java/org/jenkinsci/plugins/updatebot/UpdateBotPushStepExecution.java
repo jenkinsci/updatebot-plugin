@@ -104,7 +104,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
                 file = configFile.toString();
             }
         }
-        List<String> arguments = Arrays.asList( "--dir", file, "push");
+        List<String> arguments = Arrays.asList("--dir", file, "push");
         return runUpdateBotCLI(arguments);
     }
 
@@ -117,7 +117,8 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         try {
             Method pollMethod = findMethod(getUpdateBotClazz(), "poll");
 
-            Object answer = invokeMethod(pollMethod);
+            Object updateBot = getUpdateBot();
+            Object answer = invokeMethod(updateBot, pollMethod, new Object[]{});
 
             List<String> pullRequests = new ArrayList<>();
             boolean pending = true;
@@ -161,11 +162,15 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
 
         List<String> arguments = ListHelpers.concat(globalArguments, originalArguments);
         try {
-            Method runMethod = findMethod(getUpdateBotClazz(), "run", String[].class);
+            Object updateBot = getUpdateBot();
+
+            Class<?> clazz = getUpdateBotClazz();
+            Method runMethod = findMethod(clazz, "run", String[].class);
+            Method setLoggerOutputMethod = findMethod(clazz, "setLoggerOutput", PrintStream.class);
+            invokeMethod(updateBot, setLoggerOutputMethod, new Object[]{getLogger()});
 
             String[] args = arguments.toArray(new String[arguments.size()]);
-            Object[] methodArgs = {args};
-            invokeMethod(runMethod, methodArgs);
+            invokeMethod(updateBot, runMethod, new Object[]{args});
             return null;
         } catch (Exception e) {
             return PollComplete.failure(e);
@@ -179,10 +184,9 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         }
     }
 
-    protected Object invokeMethod(Method method, Object... arguments) throws Exception {
-        Object updateBot = getUpdateBot();
+    protected Object invokeMethod(Object object, Method method, Object[] arguments) throws Exception {
         try {
-            return method.invoke(updateBot, arguments);
+            return method.invoke(object, arguments);
         } catch (InvocationTargetException e) {
             Throwable targetException = e.getTargetException();
             if (targetException instanceof Exception) {
