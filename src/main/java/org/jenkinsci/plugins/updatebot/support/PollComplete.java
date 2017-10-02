@@ -19,6 +19,7 @@ package org.jenkinsci.plugins.updatebot.support;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
 import java.io.PrintStream;
+import java.util.List;
 
 /**
  * An object used to return the status of polling of the UpdateBot
@@ -44,11 +45,19 @@ public class PollComplete {
             logger.println("UpdateBot failed " + failure);
             context.onFailure(failure);
         } else {
-            if (success == null) {
-                success = "Completed!";
+            Object success = this.success;
+            if (success instanceof List) {
+                List list = (List) success;
+                if (list.isEmpty()) {
+                    success = null;
+                }
             }
-            logger.println("UpdateBot success: " + success);
-            context.onSuccess(success);
+            if (success == null) {
+                logger.println("UpdateBot completed successfully");
+            } else {
+                logger.println("UpdateBot success: " + success);
+            }
+            context.onSuccess(this.success);
         }
     }
 
