@@ -15,23 +15,33 @@
  */
 package org.jenkinsci.plugins.updatebot;
 
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.Extension;
+import hudson.model.Item;
+import hudson.model.Queue;
+import hudson.model.queue.Tasks;
+import hudson.security.ACL;
+import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import static org.jenkinsci.plugins.updatebot.UpdateBotPushStepExecution.githubDomainRequirements;
+import static org.jenkinsci.plugins.updatebot.UpdateBotPushStepExecution.githubScanCredentialsMatcher;
 
 @Extension
 public class GlobalPluginConfiguration extends GlobalConfiguration {
-    private String githubUsername;
-    private String githubPassword;
-    private String githubToken;
+    private String credentialsId;
 
     @DataBoundConstructor
-    public GlobalPluginConfiguration(String githubUsername, String githubPassword, String githubToken) {
-        this.githubUsername = githubUsername;
-        this.githubPassword = githubPassword;
-        this.githubToken = githubToken;
+    public GlobalPluginConfiguration(String credentialsId) {
+        this.credentialsId = credentialsId;
         configChange();
     }
 
@@ -58,30 +68,39 @@ public class GlobalPluginConfiguration extends GlobalConfiguration {
         return true;
     }
 
-    public String getGithubUsername() {
-        return githubUsername;
+    public String getCredentialsId() {
+        return credentialsId;
     }
 
-    public void setGithubUsername(String githubUsername) {
-        this.githubUsername = githubUsername;
-    }
-
-    public String getGithubPassword() {
-        return githubPassword;
-    }
-
-    public void setGithubPassword(String githubPassword) {
-        this.githubPassword = githubPassword;
-    }
-
-    public String getGithubToken() {
-        return githubToken;
-    }
-
-    public void setGithubToken(String githubToken) {
-        this.githubToken = githubToken;
+    public void setCredentialsId(String credentialsId) {
+        this.credentialsId = credentialsId;
     }
 
     private void configChange() {
+    }
+
+    public ListBoxModel doFillCredentialsIdItems(@CheckForNull @AncestorInPath Item context,
+                                                 @QueryParameter String apiUri,
+                                                 @QueryParameter String credentialsId) {
+        if (context == null
+                ? !Jenkins.getActiveInstance().hasPermission(Jenkins.ADMINISTER)
+                : !context.hasPermission(Item.EXTENDED_READ)) {
+            return new StandardListBoxModel().includeCurrentValue(credentialsId);
+        }
+        return listScanCredentials(context, apiUri);
+    }
+
+    private ListBoxModel listScanCredentials(Item context, String apiUri) {
+        return new StandardListBoxModel()
+                .includeEmptyValue()
+                .includeMatchingAs(
+                        context instanceof Queue.Task
+                                ? Tasks.getDefaultAuthenticationOf((Queue.Task) context)
+                                : ACL.SYSTEM,
+                        context,
+                        StandardUsernameCredentials.class,
+                        githubDomainRequirements(apiUri),
+                        githubScanCredentialsMatcher()
+                );
     }
 }

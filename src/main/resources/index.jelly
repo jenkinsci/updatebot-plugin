@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    Applies updatebot as part of a Jenkins pipeline
+  Applies updatebot as part of a Jenkins pipeline
 </div>
