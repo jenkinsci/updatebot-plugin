@@ -31,4 +31,13 @@ node {
 
 The `updateBotPush` command then uses the [UpdateBot Configuration mechanism](https://github.com/fabric8-updatebot/updatebot#configuration) to find which git repositories to perform pull requests on. 
 
-Typically this configured via a local `.updatebot.yml` file or if there is no `.updatebot.yml` file then [UpdateBot](https://github.com/fabric8-updatebot/updatebot) will look for a github repository at https://github.com/organisation/organisation-updatebot/ where `organisation` is your actual github organisation name.
+Typically this configured via a local `.updatebot.yml` file or if there is no `.updatebot.yml` file then [UpdateBot](https://github.com/fabric8-updatebot/updatebot) will look for a github repository at `https://github.com/organisation/organisation-updatebot/` where `organisation` is your actual github organisation name.
+
+### Requirements
+
+To run [UpdateBot](https://github.com/fabric8-updatebot/updatebot) on your projects your Jenkins master will need the following:
+
+* a Maven tool installation for working with Java/Maven based projects
+* a NodeJS tool installation for working with node based projects
+
+The Maven or Node installations can be made inside the docker image for your Jenkins master if you prefer; then you don't have to use the tool installation mechanism in your Jenkins master.
