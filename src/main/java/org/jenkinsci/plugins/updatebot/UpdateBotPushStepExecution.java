@@ -40,6 +40,7 @@ import hudson.tools.ToolInstaller;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.UpdateBot;
 import io.fabric8.updatebot.commands.PushSourceChanges;
+import io.fabric8.updatebot.commands.StatusInfo;
 import io.fabric8.utils.Strings;
 import jenkins.util.Timer;
 import org.acegisecurity.Authentication;
@@ -57,6 +58,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -166,24 +168,15 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
      */
     protected PollComplete pollUpdateBotStatus() {
         try {
-            List<Map<String, String>> list = updatebot.poll();
-            List<String> pullRequests = new ArrayList<>();
             boolean pending = false;
-            for (Object object : list) {
-                if (object instanceof Map) {
-                    Map map = (Map) object;
-                    Object status = map.get("status");
-                    if (status != null && !"complete".equalsIgnoreCase(status.toString())) {
-                        pending = true;
-                    }
-                    Object pr = map.get("pr");
-                    if (pr != null) {
-                        pullRequests.add(pr.toString());
-                    }
+            Collection<StatusInfo> statusInfos = updatebot.poll().values();
+            for (StatusInfo statusInfo : statusInfos) {
+                if (statusInfo.isPending()) {
+                    pending = true;
                 }
             }
             if (!pending) {
-                return PollComplete.success(pullRequests);
+                return PollComplete.success(null);
             }
             return null;
         } catch (Exception e) {

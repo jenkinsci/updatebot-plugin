@@ -52,6 +52,7 @@ public class PollComplete {
                     success = null;
                 }
             }
+            logger.println();
             if (success == null) {
                 logger.println("UpdateBot completed successfully");
             } else {

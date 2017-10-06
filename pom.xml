@@ -18,7 +18,7 @@
 
   <properties>
     <jenkins.version>2.69</jenkins.version>
-    <updatebot.version>1.0.14</updatebot.version>
+    <updatebot.version>1.0.15</updatebot.version>
 
     <java.level>8</java.level>
   </properties>
