@@ -1,6 +1,8 @@
 Updatebot Plugin
 -------------------
 
+[![Build Status](https://ci.jenkins.io/job/Plugins/job/updatebot-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/updatebot-plugin/job/master/)
+
 [UpdateBot](https://github.com/fabric8-updatebot/updatebot) is a bot which updates dependencies in source code via Pull Requests.
 
 The Updatebot Jenkins Plugin provides an easy way to use [UpdateBot](https://github.com/fabric8-updatebot/updatebot) inside your[Jenkins Pipeline](https://github.com/jenkinsci/pipeline-plugin)
