@@ -33,10 +33,8 @@ import hudson.model.TaskListener;
 import hudson.security.ACL;
 import hudson.slaves.NodeSpecific;
 import hudson.tasks.Maven;
-import hudson.tools.DownloadFromUrlInstaller;
 import hudson.tools.ToolDescriptor;
 import hudson.tools.ToolInstallation;
-import hudson.tools.ToolInstaller;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.UpdateBot;
 import io.fabric8.updatebot.commands.PushSourceChanges;
@@ -50,13 +48,14 @@ import org.jenkinsci.plugins.updatebot.support.SystemHelper;
 import org.jenkinsci.plugins.updatebot.support.ToolInfo;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepExecutionImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,7 +71,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
     public static final String JDK = "JDK";
     public static final String MAVEN = "Maven";
     public static final String NODE_JS = "NodeJS";
-
+    private static final transient Logger LOG = LoggerFactory.getLogger(UpdateBotPushStepExecution.class);
     private static final long serialVersionUID = 1L;
 
     @Inject
@@ -214,8 +213,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
                         CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsId), githubScanCredentialsMatcher())
                 );
             } catch (Exception e) {
-                logger.println("ERROR: looking up credentials: " + e);
-                e.printStackTrace(logger);
+                configuration.error(LOG, "looking up credentials: " + e, e);
             }
 
             //logger.println("Found credentials " + credentials + " for " + credentialsId);
@@ -314,22 +312,22 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
                 Map<String, String> javaInfoEnvVarMap = javaInfo.getEnvVarMap();
                 envVarMap.putAll(javaInfoEnvVarMap);
             } else {
-                getLogger().println("WARNING: no Java tool found so cannot set the JAVA environment variables required for maven!");
+                configuration.warn(LOG, "no Java tool found so cannot set the JAVA environment variables required for maven!");
             }
             getLogger().println("Using mvn executable: " + mvn + " with env vars: " + envVarMap);
             configuration.setMvnCommand(mvn);
             configuration.setMvnEnvironmentVariables(envVarMap);
         } else {
-            getLogger().println("WARNING: no Maven installation found! May not be able to update maven projects. To fix please use the Manage Jenkins -> Global Tool Configuration and add a Maven installation");
+            configuration.warn(LOG, "no Maven installation found! May not be able to update maven projects. To fix please use the Manage Jenkins -> Global Tool Configuration and add a Maven installation");
         }
         if (nodeInfo != null && nodeInfo.hasHome()) {
             String npm = new File(nodeInfo.getHome(), "bin/npm" + suffix).getCanonicalPath();
             Map<String, String> envVarMap = nodeInfo.getEnvVarMap();
-            getLogger().println("Using npm executable: " + npm + " with env vars: "+ envVarMap);
+            getLogger().println("Using npm executable: " + npm + " with env vars: " + envVarMap);
             configuration.setNpmCommand(npm);
             configuration.setNpmEnvironmentVariables(envVarMap);
         } else {
-            getLogger().println("WARNING: no NodeJS installation found! May not be able to update node projects. To fix please use the Manage Jenkins -> Global Tool Configuration and add a NodeJS installation");
+            configuration.warn(LOG, "no NodeJS installation found! May not be able to update node projects. To fix please use the Manage Jenkins -> Global Tool Configuration and add a NodeJS installation");
         }
     }
 
