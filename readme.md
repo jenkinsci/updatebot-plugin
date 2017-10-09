@@ -9,7 +9,7 @@ The Updatebot Jenkins Plugin provides an easy way to use [UpdateBot](https://git
 
 ### Example  
 
-Here's an example of using the `updateBotPush` command inside your pipeline:
+Here's an example of using the `updateBotPush()` step inside your pipeline:
 
 ```groovy
 node {
@@ -25,7 +25,7 @@ node {
     stage('UpdateBot') {
         // now lets update any dependent projects with this new release
         // using the local file system as the tagged source code with versions
-        updateBotPush
+        updateBotPush()
     }
 }
 
