@@ -13,7 +13,7 @@ mavenNode {
         container('maven'){
           def currentVersion = flow.getProjectVersion()
           flow.setupWorkspaceForRelease('jenkinsci/updatebot-plugin', true, "", currentVersion)
-          sh 'mvn deploy -DaltDeploymentRepository=repo.jenkins-ci.org::default::https://repo.jenkins-ci.org/public'
+          sh 'mvn deploy -P repo.jenkins-ci.org'
         }
       }
     }
