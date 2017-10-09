@@ -38,6 +38,7 @@ import static org.jenkinsci.plugins.updatebot.UpdateBotPushStepExecution.githubS
 @Extension
 public class GlobalPluginConfiguration extends GlobalConfiguration {
     private String credentialsId;
+    private boolean useAnsiColor = true;
 
     @DataBoundConstructor
     public GlobalPluginConfiguration(String credentialsId) {
@@ -102,5 +103,13 @@ public class GlobalPluginConfiguration extends GlobalConfiguration {
                         githubDomainRequirements(apiUri),
                         githubScanCredentialsMatcher()
                 );
+    }
+
+    public boolean isUseAnsiColor() {
+        return useAnsiColor;
+    }
+
+    public void setUseAnsiColor(boolean useAnsiColor) {
+        this.useAnsiColor = useAnsiColor;
     }
 }

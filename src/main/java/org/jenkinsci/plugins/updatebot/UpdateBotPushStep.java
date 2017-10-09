@@ -26,6 +26,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -35,13 +36,11 @@ public class UpdateBotPushStep extends Step {
 
     private static final long DEFAULT_POLL_PERIOD = 15000L;
 
-    private final String file;
-    private final Long pollPeriodMS;
+    private String file;
+    private long pollPeriodMS = DEFAULT_POLL_PERIOD;
 
     @DataBoundConstructor
-    public UpdateBotPushStep(String file, Long pollPeriodMS) {
-        this.file = file != null && file.length() > 0 ? file : ".";
-        this.pollPeriodMS = pollPeriodMS;
+    public UpdateBotPushStep() {
     }
 
     @Override
@@ -53,15 +52,18 @@ public class UpdateBotPushStep extends Step {
         return file;
     }
 
-    public Long getPollPeriodMS() {
+    @DataBoundSetter
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    public long getPollPeriodMS() {
         return pollPeriodMS;
     }
 
-    public long pollPeriodMS() {
-        if (pollPeriodMS == null || pollPeriodMS.longValue() == 0L) {
-            return DEFAULT_POLL_PERIOD;
-        }
-        return pollPeriodMS.longValue();
+    @DataBoundSetter
+    public void setPollPeriodMS(long pollPeriodMS) {
+        this.pollPeriodMS = pollPeriodMS;
     }
 
     @Extension
@@ -82,7 +84,7 @@ public class UpdateBotPushStep extends Step {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Pushes dependency versions from the local source code into dependent projects using UpdateBot";
+            return Messages.UpdateBotPushStep_DescriptorImpl_DisplayName();
         }
     }
 }

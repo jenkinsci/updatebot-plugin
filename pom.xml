@@ -18,7 +18,7 @@
 
   <properties>
     <jenkins.version>2.69</jenkins.version>
-    <updatebot.version>1.0.15</updatebot.version>
+    <updatebot.version>1.0.18</updatebot.version>
 
     <java.level>8</java.level>
   </properties>
@@ -56,6 +56,13 @@
       <groupId>io.fabric8.updatebot</groupId>
       <artifactId>updatebot-core</artifactId>
       <version>${updatebot.version}</version>
+    </dependency>
+
+    <!-- lets enable ansi color handling -->
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>ansicolor</artifactId>
+      <version>0.5.2</version>
     </dependency>
 
     <!-- testing -->
@@ -141,20 +148,6 @@
       <version>1.12</version>
       <scope>test</scope>
     </dependency>
-<!--
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-      <version>5.0.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-tree</artifactId>
-      <version>5.0.3</version>
-      <scope>test</scope>
-    </dependency>
--->
   </dependencies>
 
   <developers>

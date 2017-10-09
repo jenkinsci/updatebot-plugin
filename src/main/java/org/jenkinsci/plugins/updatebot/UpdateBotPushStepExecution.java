@@ -30,6 +30,7 @@ import hudson.model.EnvironmentSpecific;
 import hudson.model.Item;
 import hudson.model.Node;
 import hudson.model.TaskListener;
+import hudson.plugins.ansicolor.AnsiHelper;
 import hudson.security.ACL;
 import hudson.slaves.NodeSpecific;
 import hudson.tasks.Maven;
@@ -56,6 +57,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -92,7 +94,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         this.step = step;
     }
 
-    static List<DomainRequirement> githubDomainRequirements(String apiUri) {
+    public static List<DomainRequirement> githubDomainRequirements(String apiUri) {
         return URIRequirementBuilder.fromUri(StringUtils.defaultIfEmpty(apiUri, "https://github.com")).build();
     }
 
@@ -187,11 +189,16 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
     protected void configureUpdateBot(Configuration configuration) throws IOException {
         GlobalPluginConfiguration config = GlobalPluginConfiguration.get();
 
-        configuration.setPrintStream(getLogger());
+        PrintStream logger = getLogger();
+        if (config.isUseAnsiColor()) {
+            logger = new PrintStream(AnsiHelper.createAnsiStream(logger), true, Charset.defaultCharset().name());
+            logger.println("Using Ansi Color logging!");
+        }
+
+        configuration.setPrintStream(logger);
         configuration.setUseHttpsTransport(true);
 
         String credentialsId = config.getCredentialsId();
-        PrintStream logger = getLogger();
         UsernamePasswordCredentials usernamePasswordCredentials = null;
         if (Strings.notEmpty(credentialsId)) {
             Item context = null;
@@ -294,10 +301,10 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
 */
                 toolInfoMap.put(displayName, toolInfo);
                 if (toolInfo.hasHome()) {
-                    getLogger().println(displayName + " at " + toolInfo.getHome());
+                    logger.println(displayName + " at " + toolInfo.getHome());
                     break;
                 } else if (!installs) {
-                    getLogger().println(displayName + " as no installations");
+                    logger.println(displayName + " as no installations");
                 }
             }
         }
@@ -314,7 +321,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
             } else {
                 configuration.warn(LOG, "no Java tool found so cannot set the JAVA environment variables required for maven!");
             }
-            getLogger().println("Using mvn executable: " + mvn + " with env vars: " + envVarMap);
+            logger.println("Using mvn executable: " + mvn + " with env vars: " + envVarMap);
             configuration.setMvnCommand(mvn);
             configuration.setMvnEnvironmentVariables(envVarMap);
         } else {
@@ -323,7 +330,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         if (nodeInfo != null && nodeInfo.hasHome()) {
             String npm = new File(nodeInfo.getHome(), "bin/npm" + suffix).getCanonicalPath();
             Map<String, String> envVarMap = nodeInfo.getEnvVarMap();
-            getLogger().println("Using npm executable: " + npm + " with env vars: " + envVarMap);
+            logger.println("Using npm executable: " + npm + " with env vars: " + envVarMap);
             configuration.setNpmCommand(npm);
             configuration.setNpmEnvironmentVariables(envVarMap);
         } else {
@@ -341,7 +348,7 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
             warnMissingField("step");
             return;
         }
-        task = timer.schedule(createUpdateBotPoller(), step.pollPeriodMS(), TimeUnit.MILLISECONDS);
+        task = timer.schedule(createUpdateBotPoller(), step.getPollPeriodMS(), TimeUnit.MILLISECONDS);
     }
 
     protected void warnMissingField(String field) {
