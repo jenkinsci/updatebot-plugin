@@ -2,14 +2,18 @@
 @Library('github.com/fabric8io/fabric8-pipeline-library@master')
 def utils = new io.fabric8.Utils()
 mavenNode {
-  checkout scm
-  if (utils.isCI()) {
-    echo 'CI provided by the Jenkins organisation'
-  } else if (utils.isCD()) {
-    sh "git remote set-url origin git@github.com:jenkinsci/updatebot-plugin.git"
-    stage('release'){
-      container('maven'){
-        sh 'mvn release:prepare release:perform'
+  ws {
+    checkout scm
+    if (utils.isCI()) {
+      echo 'CI provided by the Jenkins organisation'
+    } else if (utils.isCD()) {
+      sh "git remote set-url origin git@github.com:jenkinsci/updatebot-plugin.git"
+      stage('release'){
+        container('maven'){
+          def currentVersion = flow.getProjectVersion()
+          flow.setupWorkspaceForRelease('jenkinsci/updatebot-plugin', true, "", currentVersion)
+          sh 'mvn deploy -DaltDeploymentRepository=repo.jenkins-ci.org::default::https://repo.jenkins-ci.org/public'
+        }
       }
     }
   }
