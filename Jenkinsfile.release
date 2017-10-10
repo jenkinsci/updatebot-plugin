@@ -14,6 +14,13 @@ mavenNode {
           def currentVersion = flow.getProjectVersion()
           flow.setupWorkspaceForRelease('jenkinsci/updatebot-plugin', true, "", currentVersion)
           sh 'mvn deploy -P repo.jenkins-ci.org'
+
+          // TODO we could guess the workspace and plugin name from the git repo
+
+          waitUntilJenkinsPluginSynced.groovy {
+            name = "updatebot"
+            version = currentVersion
+          }
         }
       }
     }
