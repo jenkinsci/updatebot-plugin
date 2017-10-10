@@ -17,7 +17,7 @@ mavenNode {
 
           // TODO we could guess the workspace and plugin name from the git repo
 
-          waitUntilJenkinsPluginSynced.groovy {
+          waitUntilJenkinsPluginSynced {
             name = "updatebot"
             version = currentVersion
           }
