@@ -174,8 +174,6 @@ public class ImportGithubRepoBuild extends Build<ImportGithubRepoProject, Import
         JenkinsHelpers.createItem(configuration, parent, repository, project, "WorkflowMultiBranchProject for " + repository);
 
         // now lets trigger a scan
-        List<Action> buildActions = new ArrayList<Action>();
-        buildActions.add(new CauseAction(new Cause.UserIdCause()));
         Item item = jenkins.getItemByFullName(repository);
         if (item instanceof WorkflowMultiBranchProject) {
             WorkflowMultiBranchProject job = (WorkflowMultiBranchProject) item;
