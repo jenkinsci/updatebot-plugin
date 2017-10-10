@@ -103,6 +103,60 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         return CredentialsMatchers.anyOf(CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class));
     }
 
+    public static PrintStream configureFromGlobalPluginConfiguration(Configuration configuration, PrintStream logger) throws IOException {
+        GlobalPluginConfiguration config = GlobalPluginConfiguration.get();
+
+        if (config.isUseAnsiColor()) {
+            logger = new PrintStream(AnsiHelper.createAnsiStream(logger), true, Charset.defaultCharset().name());
+            logger.println("Using Ansi Color logging!");
+        }
+
+        configuration.setPrintStream(logger);
+        configuration.setUseHttpsTransport(true);
+
+        String credentialsId = config.getCredentialsId();
+        UsernamePasswordCredentials usernamePasswordCredentials = null;
+        if (Strings.notEmpty(credentialsId)) {
+            Item context = null;
+            Authentication authentication = ACL.SYSTEM;
+/*
+            Authentication authentication = context instanceof Queue.Task
+                    ? Tasks.getDefaultAuthenticationOf((Queue.Task) context)
+                    : ACL.SYSTEM;
+*/
+            StandardUsernameCredentials credentials = null;
+            try {
+                credentials = CredentialsMatchers.firstOrNull(
+                        CredentialsProvider.lookupCredentials(
+                                StandardUsernameCredentials.class,
+                                context,
+                                authentication,
+                                githubDomainRequirements("")
+                        ),
+                        CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsId), githubScanCredentialsMatcher())
+                );
+            } catch (Exception e) {
+                configuration.error(LOG, "looking up credentials: " + e, e);
+            }
+
+            //logger.println("Found credentials " + credentials + " for " + credentialsId);
+
+            if (credentials == null) {
+                throw new IOException("Could not find the credentials " + credentialsId + ". Please check the UpdateBot configuration on the Manage Jenkins page!");
+            }
+            if (credentials instanceof UsernamePasswordCredentials) {
+                usernamePasswordCredentials = (UsernamePasswordCredentials) credentials;
+            } else {
+                throw new IOException("The chosen credential " + credentialsId + " has no username and password! Please choose another credential on the UpdateBot section of the Manage Jenkins page!");
+            }
+        } else {
+            throw new IOException("No credentials configured for the UpdateBot plugin! Please update the configuration on the Manage Jenkins page!");
+        }
+        configuration.setGithubUsername(usernamePasswordCredentials.getUsername());
+        configuration.setGithubPassword(usernamePasswordCredentials.getPassword().getPlainText());
+        return logger;
+    }
+
     @Override
     public boolean start() throws Exception {
         shouldStop = false;
@@ -161,7 +215,6 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         return null;
     }
 
-
     /**
      * Runs the updatebot poll operation to check if any pending PRs have completed or need rebasing
      *
@@ -185,59 +238,9 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         }
     }
 
-
     protected void configureUpdateBot(Configuration configuration) throws IOException {
-        GlobalPluginConfiguration config = GlobalPluginConfiguration.get();
-
         PrintStream logger = getLogger();
-        if (config.isUseAnsiColor()) {
-            logger = new PrintStream(AnsiHelper.createAnsiStream(logger), true, Charset.defaultCharset().name());
-            logger.println("Using Ansi Color logging!");
-        }
-
-        configuration.setPrintStream(logger);
-        configuration.setUseHttpsTransport(true);
-
-        String credentialsId = config.getCredentialsId();
-        UsernamePasswordCredentials usernamePasswordCredentials = null;
-        if (Strings.notEmpty(credentialsId)) {
-            Item context = null;
-            Authentication authentication = ACL.SYSTEM;
-/*
-            Authentication authentication = context instanceof Queue.Task
-                    ? Tasks.getDefaultAuthenticationOf((Queue.Task) context)
-                    : ACL.SYSTEM;
-*/
-            StandardUsernameCredentials credentials = null;
-            try {
-                credentials = CredentialsMatchers.firstOrNull(
-                        CredentialsProvider.lookupCredentials(
-                                StandardUsernameCredentials.class,
-                                context,
-                                authentication,
-                                githubDomainRequirements("")
-                        ),
-                        CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsId), githubScanCredentialsMatcher())
-                );
-            } catch (Exception e) {
-                configuration.error(LOG, "looking up credentials: " + e, e);
-            }
-
-            //logger.println("Found credentials " + credentials + " for " + credentialsId);
-
-            if (credentials == null) {
-                throw new IOException("Could not find the credentials " + credentialsId + ". Please check the UpdateBot configuration on the Manage Jenkins page!");
-            }
-            if (credentials instanceof UsernamePasswordCredentials) {
-                usernamePasswordCredentials = (UsernamePasswordCredentials) credentials;
-            } else {
-                throw new IOException("The chosen credential " + credentialsId + " has no username and password! Please choose another credential on the UpdateBot section of the Manage Jenkins page!");
-            }
-        } else {
-            throw new IOException("No credentials configured for the UpdateBot plugin! Please update the configuration on the Manage Jenkins page!");
-        }
-        configuration.setGithubUsername(usernamePasswordCredentials.getUsername());
-        configuration.setGithubPassword(usernamePasswordCredentials.getPassword().getPlainText());
+        configureFromGlobalPluginConfiguration(configuration, logger);
 
         Set<String> tools = new HashSet<>(Arrays.asList(JDK, MAVEN, NODE_JS));
 
