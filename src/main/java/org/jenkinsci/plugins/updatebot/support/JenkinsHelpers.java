@@ -19,12 +19,10 @@ package org.jenkinsci.plugins.updatebot.support;
 import com.cloudbees.hudson.plugins.folder.Folder;
 import hudson.BulkChange;
 import hudson.model.Action;
-import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Saveable;
 import hudson.model.queue.QueueTaskFuture;
-import hudson.plugins.git.RevisionParameterAction;
 import hudson.util.XStream2;
 import io.fabric8.updatebot.Configuration;
 import jenkins.model.Jenkins;
@@ -36,11 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.logging.Level.SEVERE;
 
 /**
  */

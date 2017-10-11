@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -226,14 +225,8 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
      */
     protected PollComplete pollUpdateBotStatus() {
         try {
-            boolean pending = false;
-            Collection<StatusInfo> statusInfos = updatebot.poll().values();
-            for (StatusInfo statusInfo : statusInfos) {
-                if (statusInfo.isPending()) {
-                    pending = true;
-                }
-            }
-            if (!pending) {
+            Map<String, StatusInfo> status = updatebot.poll();
+            if (!StatusInfo.isPending(status)) {
                 return PollComplete.success(null);
             }
             return null;
@@ -253,7 +246,6 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         for (ToolDescriptor<?> desc : ToolInstallation.all()) {
             String displayName = desc.getDisplayName();
             if (tools.contains(displayName)) {
-                //getLogger().println("Found tool " + displayName);
                 ToolInfo toolInfo = new ToolInfo();
                 EnvVars envVars = new EnvVars();
                 if (desc instanceof Maven.MavenInstallation.DescriptorImpl) {
