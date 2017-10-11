@@ -114,6 +114,10 @@ public class UpdateBotPushStepExecution extends AbstractStepExecutionImpl {
         configuration.setPrintStream(logger);
         configuration.setUseHttpsTransport(true);
 
+        String jenkinsfileLibraryGitCloneURL = config.getJenkinsfileLibraryGitCloneURL();
+        if (Strings.notEmpty(jenkinsfileLibraryGitCloneURL)) {
+            configuration.setJenksinsfileGitRepo(jenkinsfileLibraryGitCloneURL);
+        }
         String credentialsId = config.getCredentialsId();
         UsernamePasswordCredentials usernamePasswordCredentials = null;
         if (Strings.notEmpty(credentialsId)) {

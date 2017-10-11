@@ -21,5 +21,9 @@
     <f:entry title="GitHub Credentials" field="credentialsId">
       <c:select checkMethod="post"/>
     </f:entry>
+
+    <f:entry field="jenkinsfileLibraryGitCloneURL" title="The Jenkinsfile library git clone URL">
+      <f:textbox/>
+    </f:entry>
   </f:section>
 </j:jelly>

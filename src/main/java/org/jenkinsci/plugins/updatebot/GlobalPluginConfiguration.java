@@ -24,6 +24,7 @@ import hudson.model.Queue;
 import hudson.model.queue.Tasks;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
+import io.fabric8.updatebot.Configuration;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -39,6 +40,7 @@ import static org.jenkinsci.plugins.updatebot.UpdateBotPushStepExecution.githubS
 public class GlobalPluginConfiguration extends GlobalConfiguration {
     private String credentialsId;
     private boolean useAnsiColor = true;
+    private String jenkinsfileLibraryGitCloneURL = Configuration.DEFAULT_JENKINSFILE_LIBRARY_GIT_URL;
 
     @DataBoundConstructor
     public GlobalPluginConfiguration(String credentialsId) {
@@ -75,6 +77,14 @@ public class GlobalPluginConfiguration extends GlobalConfiguration {
 
     public void setCredentialsId(String credentialsId) {
         this.credentialsId = credentialsId;
+    }
+
+    public String getJenkinsfileLibraryGitCloneURL() {
+        return jenkinsfileLibraryGitCloneURL;
+    }
+
+    public void setJenkinsfileLibraryGitCloneURL(String jenkinsfileLibraryGitCloneURL) {
+        this.jenkinsfileLibraryGitCloneURL = jenkinsfileLibraryGitCloneURL;
     }
 
     private void configChange() {
