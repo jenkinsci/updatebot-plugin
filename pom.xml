@@ -18,8 +18,7 @@
 
   <properties>
     <jenkins.version>2.69</jenkins.version>
-    <updatebot.version>1.0.19</updatebot.version>
-
+    <updatebot.version>1.0.22</updatebot.version>
     <java.level>8</java.level>
   </properties>
 
@@ -101,12 +100,12 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>token-macro</artifactId>
-      <version>2.0</version>
+      <version>2.1</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>display-url-api</artifactId>
-      <version>0.2</version>
+      <version>2.0</version>
     </dependency>
 
 
