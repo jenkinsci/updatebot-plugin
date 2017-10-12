@@ -1,7 +1,7 @@
 Updatebot Plugin
 -------------------
 
-[![Build Status](https://ci.jenkins.io/job/Plugins/job/updatebot-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/updatebot-plugin/job/master/)
+[![Build Status](https://ci.jenkins.io/job/Plugins/job/updatebot-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/updatebot-plugin/job/master/) | ![Apache 2](http://img.shields.io/badge/license-Apache%202-red.svg) | [Wiki](https://wiki.jenkins.io/display/JENKINS/Updatebot+Plugin)
 
 [UpdateBot](https://github.com/fabric8-updatebot/updatebot) is a bot which updates dependencies in source code via Pull Requests.
 
