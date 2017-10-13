@@ -17,6 +17,7 @@
 package org.jenkinsci.plugins.updatebot;
 
 import com.cloudbees.hudson.plugins.folder.Folder;
+import hudson.FilePath;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
@@ -133,6 +134,18 @@ public class ImportGithubRepoBuild extends Build<ImportGithubRepoProject, Import
             command.setPipeline(pipeline);
         }
         configuration.info(LOG, "Enabling fabric8 CI / CD on the repository " + repository);
+
+
+        FilePath currentWorkspace = getWorkspace();
+        if (currentWorkspace != null) {
+            try {
+                String file = currentWorkspace.toURI().toString();
+                configuration.setWorkDir(file);
+                configuration.setSourcePath(file);
+            } catch (Exception e) {
+                configuration.warn(LOG, "Failed to find the current workspace directory");
+            }
+        }
 
         try {
             command.run(configuration);
