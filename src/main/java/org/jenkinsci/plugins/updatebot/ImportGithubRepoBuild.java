@@ -16,12 +16,12 @@
  */
 package org.jenkinsci.plugins.updatebot;
 
-import com.cloudbees.hudson.plugins.folder.Folder;
 import hudson.FilePath;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.Result;
@@ -36,6 +36,7 @@ import jenkins.branch.BranchProperty;
 import jenkins.branch.BranchSource;
 import jenkins.branch.DefaultBranchPropertyStrategy;
 import jenkins.model.Jenkins;
+import jenkins.model.ModifiableTopLevelItemGroup;
 import jenkins.scm.api.trait.SCMSourceTrait;
 import jenkins.scm.impl.trait.RegexSCMHeadFilterTrait;
 import org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait;
@@ -194,7 +195,14 @@ public class ImportGithubRepoBuild extends Build<ImportGithubRepoProject, Import
         String organisation = paths[0];
         String repo = paths[1];
         Jenkins jenkins = Jenkins.getInstance();
-        Folder parent = (Folder) JenkinsHelpers.getOrCreateFolder(configuration, jenkins, organisation);
+        ItemGroup parentItemGroup = JenkinsHelpers.getOrCreateFolder(configuration, jenkins, organisation);
+        ModifiableTopLevelItemGroup parent = null;
+        if (parentItemGroup instanceof ModifiableTopLevelItemGroup) {
+            parent = (ModifiableTopLevelItemGroup) parentItemGroup;
+        } else {
+            configuration.warn(LOG, "Folder for " + organisation + " was not a ModifiableTopLevelItemGroup but was " + parentItemGroup);
+            parent = jenkins;
+        }
 
         WorkflowMultiBranchProject project = new WorkflowMultiBranchProject(parent, repo);
         PersistedList<BranchSource> sourcesList = project.getSourcesList();
