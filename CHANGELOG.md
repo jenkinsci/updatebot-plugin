@@ -1,3 +1,7 @@
+## 1.0.8
+
+* fixes possible ClassCastException with import github repository build
+ 
 ## 1.0.6
 
 * import git repository waits for any pending PR to be merged
