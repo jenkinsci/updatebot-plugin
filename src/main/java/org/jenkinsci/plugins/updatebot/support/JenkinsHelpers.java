@@ -45,22 +45,32 @@ public class JenkinsHelpers {
      * Returns a folder for the given name or returns null if it could not be created
      */
     public static ItemGroup getOrCreateFolder(Configuration configuration, Jenkins jenkins, String name) {
-        Item parent = jenkins.getItemByFullName(name);
-        if (parent instanceof ItemGroup) {
-            return (ItemGroup) parent;
+        return getOrCreateFolder(configuration, jenkins, name, null);
+    }
+
+    /**
+     * Returns a folder for the given name or returns null if it could not be created
+     */
+    public static ItemGroup getOrCreateFolder(Configuration configuration, Jenkins jenkins, String name, ModifiableTopLevelItemGroup parent) {
+        Item item = jenkins.getItemByFullName(name);
+        if (item instanceof ItemGroup) {
+            return (ItemGroup) item;
         } else {
+            if (parent == null) {
+                parent = jenkins;
+            }
             // lets lazily create a new folder for this namespace parent
-            Folder folder = new Folder(jenkins, name);
+            Folder folder = new Folder(parent, name);
             try {
                 folder.setDescription("Folder for the github organisation: " + name);
             } catch (IOException e) {
                 // ignore
             }
-            createItem(configuration, jenkins, name, folder, "the Folder: " + name);
+            createItem(configuration, parent, name, folder, "the Folder: " + name);
             // lets look it up again to be sure
-            parent = jenkins.getItemByFullName(name);
-            if (parent instanceof ItemGroup) {
-                return (ItemGroup) parent;
+            item = jenkins.getItemByFullName(name);
+            if (item instanceof ItemGroup) {
+                return (ItemGroup) item;
             }
         }
         configuration.warn(LOG, "Failed to create Folder: " + name);

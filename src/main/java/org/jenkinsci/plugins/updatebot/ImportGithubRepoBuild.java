@@ -155,14 +155,14 @@ public class ImportGithubRepoBuild extends Build<ImportGithubRepoProject, Import
             return Result.FAILURE;
         }
 
-        createMultiBranchProject(configuration, repository);
+        String fullJobPath = createMultiBranchProject(configuration, repository);
 
         Result answer = waitForPullRequestMerge(listener, configuration, command);
         if (answer != null) {
             return answer;
         }
 
-        return triggerScanBuild(configuration, repository);
+        return triggerScanBuild(configuration, fullJobPath);
     }
 
     protected Result waitForPullRequestMerge(BuildListener listener, Configuration configuration, CommandSupport lastCommand) throws IOException {
@@ -189,18 +189,28 @@ public class ImportGithubRepoBuild extends Build<ImportGithubRepoProject, Import
         }
     }
 
-    protected void createMultiBranchProject(Configuration configuration, String repository) {
+    protected String createMultiBranchProject(Configuration configuration, String repository) {
         // lets create a new Multi-Branch build!
         String[] paths = repository.split("/", 2);
         String organisation = paths[0];
         String repo = paths[1];
         Jenkins jenkins = Jenkins.getInstance();
-        ItemGroup parentItemGroup = JenkinsHelpers.getOrCreateFolder(configuration, jenkins, organisation);
+        String parentFolderName = "GitHub";
+        ItemGroup githubItemGroup = JenkinsHelpers.getOrCreateFolder(configuration, jenkins, parentFolderName);
+        ModifiableTopLevelItemGroup gitHubParent = null;
+        if (githubItemGroup instanceof ModifiableTopLevelItemGroup) {
+            gitHubParent = (ModifiableTopLevelItemGroup) githubItemGroup;
+        } else {
+            configuration.warn(LOG, "Folder for GitHub was not a ModifiableTopLevelItemGroup but was " + githubItemGroup);
+            gitHubParent = jenkins;
+        }
+        String orgJobName = parentFolderName + "/" + organisation;
+        ItemGroup parentItemGroup = JenkinsHelpers.getOrCreateFolder(configuration, jenkins, orgJobName, gitHubParent);
         ModifiableTopLevelItemGroup parent = null;
         if (parentItemGroup instanceof ModifiableTopLevelItemGroup) {
             parent = (ModifiableTopLevelItemGroup) parentItemGroup;
         } else {
-            configuration.warn(LOG, "Folder for " + organisation + " was not a ModifiableTopLevelItemGroup but was " + parentItemGroup);
+            configuration.warn(LOG, "Folder for " + orgJobName + " was not a ModifiableTopLevelItemGroup but was " + parentItemGroup);
             parent = jenkins;
         }
 
@@ -219,7 +229,9 @@ public class ImportGithubRepoBuild extends Build<ImportGithubRepoProject, Import
         DefaultBranchPropertyStrategy strategy = new DefaultBranchPropertyStrategy(new BranchProperty[0]);
         branchSource.setStrategy(strategy);
         sourcesList.add(branchSource);
-        JenkinsHelpers.createItem(configuration, parent, repository, project, "WorkflowMultiBranchProject for " + repository);
+        String jobPath = parentFolderName + "/" + repository;
+        JenkinsHelpers.createItem(configuration, parent, jobPath, project, "WorkflowMultiBranchProject for " + jobPath);
+        return jobPath;
     }
 
     protected Result triggerScanBuild(Configuration configuration, String repository) {
