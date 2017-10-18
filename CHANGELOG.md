@@ -1,3 +1,7 @@
+## 1.0.9
+
+* lets put all imported projects under the `GitHub` root folder to avoid clashing with fabric8/openshift.io github org folder jobs
+ 
 ## 1.0.8
 
 * fixes possible ClassCastException with import github repository build
